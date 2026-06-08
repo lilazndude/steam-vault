@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Steam Game Archiver & Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css?v=2">
+</head>
+<body>
+  <!-- Background glow effects -->
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+
+  <div class="app-container">
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="logo-container">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          <path d="M12 11v6M9 14h6"></path>
+        </svg>
+        <h1>Steam <span>Archiver</span></h1>
+      </div>
+      
+      <div class="header-actions">
+        <button id="btn-settings" class="btn btn-secondary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          Configure NAS
+        </button>
+      </div>
+    </header>
+
+    <!-- STORAGE OVERVIEW -->
+    <section class="storage-section">
+      <div class="section-title-container">
+        <h2>Storage Pools</h2>
+      </div>
+      <div id="drives-container" class="drives-grid">
+        <!-- Dynamically filled with drive widgets -->
+        <div class="drive-card loading-skeleton"></div>
+        <div class="drive-card loading-skeleton"></div>
+      </div>
+    </section>
+
+    <!-- ACTIVE TRANSFER OVERLAY / STATUS -->
+    <section id="active-transfer-panel" class="transfer-panel hidden">
+      <div class="transfer-header">
+        <div class="transfer-title">
+          <div class="pulse-indicator"></div>
+          <div>
+            <h3 id="transfer-game-name">Game Name</h3>
+            <p id="transfer-action-type">Archiving to NAS...</p>
+          </div>
+        </div>
+        <button id="btn-cancel-transfer" class="btn btn-danger btn-sm">
+          Cancel Operation
+        </button>
+      </div>
+      <div class="transfer-body">
+        <div class="progress-container">
+          <div class="progress-bar-bg">
+            <div id="transfer-progress-fill" class="progress-bar-fill" style="width: 0%"></div>
+          </div>
+          <div class="progress-labels">
+            <span id="transfer-percentage">0%</span>
+            <span id="transfer-details">0 GB / 0 GB</span>
+          </div>
+        </div>
+        <div class="transfer-stats">
+          <div class="stat-item">
+            <span class="stat-label">Speed</span>
+            <span id="transfer-speed" class="stat-val">0 MB/s</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Time Remaining</span>
+            <span id="transfer-eta" class="stat-val">00:00:00</span>
+          </div>
+          <div class="stat-item file-stat">
+            <span class="stat-label">Current File</span>
+            <span id="transfer-file" class="stat-val truncate">None</span>
+          </div>
+        </div>
+      </div>
+      <!-- QUEUE LIST -->
+      <div id="queue-container" class="queue-container hidden">
+        <h4 class="queue-subtitle">Pending Queue (<span id="queue-count">0</span>)</h4>
+        <div id="queue-list" class="queue-list">
+          <!-- Pending items go here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- STEAM APP NOTICE -->
+    <div class="steam-warning-banner" id="steam-status-banner">
+      <svg class="warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span><strong>Important:</strong> Please close the Steam Client fully (Steam ➔ Exit) before archiving or restoring games. Steam holds library states in memory and can overwrite deleted manifest files if left open.</span>
+    </div>
+
+    <!-- FILTER BAR -->
+    <section class="control-section">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search installed games...">
+      </div>
+
+      <div class="filter-controls">
+        <div class="control-group">
+          <label for="filter-status">Location</label>
+          <select id="filter-status">
+            <option value="all">All Locations</option>
+            <option value="local">Local Drive</option>
+            <option value="archived">NAS Archive</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="sort-by">Sort By</label>
+          <select id="sort-by">
+            <option value="size-desc">Size (Largest First)</option>
+            <option value="size-asc">Size (Smallest First)</option>
+            <option value="name-asc">Name (A-Z)</option>
+            <option value="status-asc">Status</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- GAMES GRID -->
+    <main class="games-section">
+      <div class="library-header">
+        <h2 id="library-count">Games Detected (0)</h2>
+        <button id="btn-refresh" class="btn btn-text">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+          </svg>
+          Scan Steam Libraries
+        </button>
+      </div>
+
+      <div id="games-grid" class="games-grid">
+        <!-- Dynamically generated game cards -->
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Scanning local disks and Steam manifests...</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- TERMINAL LOG PANEL -->
+    <footer class="console-section">
+      <div class="console-header" id="console-toggle">
+        <div class="console-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="console-icon">
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+          </svg>
+          <span>Active Operations Console</span>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chevron-icon" id="console-chevron">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+      </div>
+      <div class="console-body" id="console-body">
+        <div id="console-log" class="console-log-content">
+          Console idle. Start an archive or restore operation to view logs.
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- CONFIG MODAL -->
+  <div id="modal-settings" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Configure NAS Settings</h3>
+        <button id="btn-close-modal" class="btn-close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          Specify the folder on your NAS where games should be archived. This folder will store manifest files and game data.
+        </p>
+        <div class="form-group">
+          <label for="nas-path-input">NAS Archive Directory Path</label>
+          <input type="text" id="nas-path-input" placeholder="e.g. N:\SteamArchive or \\NAS-SERVER\shares\SteamArchive">
+          <span class="input-hint">Tip: Make sure this folder is readable and writable on your local network.</span>
+        </div>
+        <div id="settings-status-msg" class="status-msg hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancel-settings" class="btn btn-secondary">Cancel</button>
+        <button id="btn-save-settings" class="btn btn-primary">Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="index.js?v=2"></script>
+</body>
+</html>

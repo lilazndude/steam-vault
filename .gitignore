@@ -1,0 +1,12 @@
+# Local configuration (contains your personal NAS paths)
+config.json
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Operating system files
+Thumbs.db
+.DS_Store
