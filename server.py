@@ -11,7 +11,7 @@ import queue
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # Port to listen on
-PORT = 8000
+PORT = 1337
 
 # Config file location
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
